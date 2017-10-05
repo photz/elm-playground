@@ -33,6 +33,9 @@
       .stats__bar {
         background: $red;
       }
+      .stats__date {
+        font-weight: bold;
+      }
     }
   }
   &__bar-wrapper {
