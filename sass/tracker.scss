@@ -1,0 +1,155 @@
+.stats {
+  min-height: 15rem;
+  background: $turquoise;
+  color: white;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  padding-bottom: 0.5rem;
+  justify-content: space-around;
+  user-select: none;
+  &__day {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 0.25rem;
+    transition: all 0.2s ease-in-out;
+    &:hover {
+      //box-shadow: 0px 0px 40px 0px lighten($turquoise, 3%);
+      //background: lighten($turquoise, 3%);
+      .stats__bar {
+        background: $shade-d;
+      }
+      .stats__date {
+        opacity: 1.0;
+      }
+    }
+    &--today {
+      .stats__bar {
+        background: $green;
+      }
+    }
+    &--active {
+      .stats__bar {
+        background: $red;
+      }
+    }
+  }
+  &__bar-wrapper {
+    margin-bottom: 0.5rem;    
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  &__bar {
+    width: 1rem;
+    background: $shade-a;
+    cursor: pointer;
+    z-index: 2;
+    &--shadow {
+      background: darken($turquoise, 10%) !important;
+      position: absolute;
+      z-index: 1;
+      transform-origin: bottom;
+      transform: skewX(-45deg);
+      pointer-events: none;
+    }
+  }
+  &__date {
+    font-size: small;
+    cursor: pointer;
+    text-align: center;
+    opacity: 0.7;
+  }
+}
+
+.records {
+  margin: 20px -10px;
+
+}
+
+.record {
+  margin: 0.5rem;
+  background: #fff;
+  $padding: 0.75rem;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  box-shadow:0 -1px 0 #e5e5e5, 0 0 2px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.10);
+  &__project-desc-wrapper {
+    flex: auto;
+    padding: 1.5rem;
+  }
+  &__project {
+    font-weight: bold;
+  }
+  &__desc {
+    padding: 1rem 0 0;
+  }
+  &__duration {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+  }
+  &__menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    transition: all 0.25s ease-in-out;
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.5rem;
+  }
+  &:hover {
+    .record__menu {
+      opacity: 1;
+    }
+  }
+  &__button {
+    cursor: pointer;
+    margin-left: 0.5rem;
+    font-size: small;
+    &:hover {
+      color: $turquoise;
+    }
+  }
+}
+
+.duration {
+  &__number {
+    font-weight: bold;
+  }
+  &__label {
+    color: rgb(100,100,100);
+    margin-right: 0.25rem;
+    &:last-of-type {
+      margin-right: 0;
+    }
+  }
+}
+
+.new-record {
+  display: flex;
+  flex-direction: column;
+  margin: 1rem -0.125rem;
+  &__project-select {
+    margin: 0.125rem;
+  }
+  &__desc {
+    margin: 0.125rem;
+  }
+  &__bottom {
+    display: flex;
+  }
+  &__duration-input {
+    flex: 1 0;
+    margin: 0.125rem;
+  }
+  &__save-button {
+    flex: 1 0;
+    margin: 0.125rem;
+  }
+}

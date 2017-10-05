@@ -1,0 +1,53 @@
+$shade-a: rgb(250,240,254);
+$shade-b: rgb(244,247,247);
+$shade-c: rgb(227,246,243);
+$shade-d: rgb(196,237,228);
+$shade-e: rgb(173,216,199);
+
+$blue: rgb(48,196,201);
+$green: rgb(163,184,8);
+$red: rgb(210,32,66);
+$black: rgb(29,19,19);
+$turquoise: rgb(36,182,148);
+$white: #fff;
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.content {
+  flex: auto;
+}
+
+.nav {
+  position: fixed;
+  min-height: 100vh;
+  background: $white;
+  padding: 5rem 0;
+  background: $shade-c;
+  min-width: 1rem;
+  transform: translateX(-90%);
+  transition: all 0.3s ease-in-out;
+  opacity: 0.1;
+  &:hover {
+    background: $shade-b;
+    transform: translateX(0);
+    opacity: 0.95;
+  }
+  &__item {
+    cursor: pointer;
+    background: $shade-d;
+    color: $black;
+    padding: 0.5rem 4rem;
+    list-style: none;
+    transition: background-color 0.3s ease-in-out;
+    color: black;
+    &--active {
+      
+    }
+    &:hover {
+      background: $shade-e;
+    }
+  }
+}
