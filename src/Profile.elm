@@ -14,8 +14,8 @@ model = { dummy = "foobar" }
 
 type Msg = Boom
 
-update : Msg -> Model -> Model
-update msg m = m
+update : Msg -> Model -> (Model, Cmd Msg)
+update msg m = (m, Cmd.none)
 
 -- VIEW
 

@@ -35,6 +35,10 @@ $white: #fff;
     transform: translateX(0);
     opacity: 0.95;
   }
+  &__link {
+    text-decoration: none;
+    color: black;
+  }
   &__item {
     cursor: pointer;
     background: $shade-d;
@@ -42,7 +46,6 @@ $white: #fff;
     padding: 0.5rem 4rem;
     list-style: none;
     transition: background-color 0.3s ease-in-out;
-    color: black;
     &--active {
       
     }

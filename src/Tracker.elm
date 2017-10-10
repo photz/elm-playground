@@ -1,13 +1,39 @@
 module Tracker exposing (view, Model, Msg, model, update)
 
-import Html exposing (Html, button, div, text, span)
-import Html.Attributes exposing (class, classList, style, value)
+import Html exposing (Html, button, div, text, span, a)
+import Html.Attributes exposing (class, classList, style, value, href)
 import Html.Events exposing (onClick, onInput)
 import Dict exposing (Dict)
 import Time.Date as Date exposing (Date, date)
 import DataStore exposing (Record)
+import WebSocket
+import Json.Encode as Encode
+import Router
+
+server : String
+server = "ws://127.0.0.1:3000"
 
 -- MODEL
+
+encodeDate : Date.Date -> Encode.Value
+encodeDate d =
+    Encode.object
+        [ ("year", Date.year d |> Encode.int)
+        , ("month", Date.month d |> Encode.int)
+        , ("day", Date.day d |> Encode.int)
+        ]
+
+encodeRecord : DataStore.Record -> Encode.Value
+encodeRecord r =
+    Encode.object [ ("desc", Encode.string r.desc)
+                  , ("duration", Encode.int r.duration)
+                  , ("projectId", Encode.int r.projectId)
+                  , ("date", encodeDate r.date)
+                  ]
+
+storeRecord : DataStore.Record -> Cmd Msg
+storeRecord r = WebSocket.send server (Encode.encode 2 (encodeRecord r))
+
 
 type alias Model = { selectedDate : Date
                    , formProjectId : Maybe Int
@@ -25,6 +51,12 @@ model = { selectedDate = date 2017 10 3
         , formDesc = ""
         }
 
+resetForm : Model -> Model
+resetForm m = { model | formProjectId = Nothing
+              , formDesc = ""
+              , formDuration = 0
+              }
+
 -- UPDATE
 
 type Msg = SelectDate Date
@@ -33,43 +65,40 @@ type Msg = SelectDate Date
          | FormChangeDesc String
          | FormSubmit
 
-update : Msg -> Model -> (Maybe DataStore.Msg, Model)
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         SelectDate d ->
-            (Nothing, { model | selectedDate = d })
+            ({ model | selectedDate = d }, Cmd.none)
         FormChangeDuration newDuration ->
             (case String.toInt newDuration of
-                 Err e -> (Nothing, model)
+                 Err e -> (model, Cmd.none)
                  Ok duration ->
-                 (Nothing, { model | formDuration = duration })
+                 ({ model | formDuration = duration }, Cmd.none)
             )
         FormChangeDesc newDesc ->
-            (Nothing, { model | formDesc = newDesc })
+            ({ model | formDesc = newDesc }, Cmd.none)
         FormSubmit ->
             (case model.formProjectId of
                  Nothing ->
-                     (Nothing, model)
+                     (model, Cmd.none)
                  Just projectId ->
                      let newRecord = { projectId = projectId
                                      , desc = model.formDesc
                                      , duration = model.formDuration
                                      , date = model.selectedDate
+                                     , id = -1
                                      }
-                     in let msg = DataStore.CreateRecord newRecord
-                        in let newModel = { model | formProjectId = Nothing
-                                          , formDesc = ""
-                                          , formDuration = 0
-                                          }
-                           in
-                        (Just msg, newModel)
+                     in let msg = DataStore.CreateRecord newRecord in
+                     let newModel = resetForm model in
+                     (newModel, storeRecord newRecord)
             )
         FormSelectProject newId ->
             case String.toInt newId of
                 Err e ->
-                    (Nothing, model)
+                    (model, Cmd.none)
                 Ok id ->
-                    (Nothing, { model | formProjectId = Just id })
+                    ({ model | formProjectId = Just id }, Cmd.none)
 
 
 -- VIEW
@@ -106,14 +135,20 @@ renderSelectProject m =
                                [ id |> toString |> value ]
                                [ p.name |> Html.text ]
     in
+    let defOption = Html.option [ Html.Attributes.disabled True
+                                , Html.Attributes.selected True
+                                ]
+                    [ Html.text "Select a Project" ]
+    in
     let options = Dict.toList m.projects
                 |> List.map renderOption
     in
+
         Html.select
             [ onInput FormSelectProject
             , class "new-record__project-select"
             ]
-            options
+            (defOption :: options)
 
 renderForm : DataStore.Model -> Model -> Html Msg
 renderForm ds m =
@@ -135,11 +170,10 @@ renderForm ds m =
                     ]
                     []
               , Html.button
-                  [ onClick FormSubmit
-                  , class "new-record__save-button"
-                  ]
+                    [ onClick FormSubmit
+                    , class "new-record__save-button"
+                    ]
                     [ Html.text "Save" ]
-
               ]
         ]
 
@@ -188,7 +222,7 @@ renderStats ds m =
         |> List.map (\d -> renderBar ds m d))
 
 
-renderRecord : DataStore.Model ->Record -> Html Msg
+renderRecord : DataStore.Model -> Record -> Html Msg
 renderRecord ds r =
     case r.projectId |> DataStore.getProject ds of
         Nothing -> div [] [ Html.text "invalid project id" ]
@@ -197,7 +231,9 @@ renderRecord ds r =
             [ class "record" ]
             [ div [ class "record__project-desc-wrapper" ]
                   [ div [ class "record__project" ]
-                        [ project.name |> Html.text ]
+                        [ a [ href (Router.projectPath project.id) ]
+                          [ project.name |> Html.text ]
+                        ]
                   , div [ class "record__desc" ]
                         [ Html.text r.desc ]
                   ]
